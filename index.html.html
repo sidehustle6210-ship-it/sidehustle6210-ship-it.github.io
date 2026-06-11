@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Counter – Free Online Word & Character Count Tool</title>
+  <meta name="description" content="Count words, characters, sentences, paragraphs and reading time instantly. Free, no signup required.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222636;
+      --border: #2e3349;
+      --accent: #6c63ff;
+      --accent2: #a78bfa;
+      --text: #e8eaf0;
+      --muted: #8b90a8;
+      --green: #34d399;
+      --yellow: #fbbf24;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* AD SLOTS */
+    .ad-top {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      padding: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .ad-top span { opacity: 0.5; }
+
+    header {
+      padding: 32px 24px 24px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 28px 20px;
+    }
+
+    /* STATS ROW */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--accent); }
+
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent2);
+      line-height: 1;
+      margin-bottom: 4px;
+      transition: color 0.2s;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* TEXTAREA */
+    .editor-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 260px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      padding: 18px 18px 50px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea::placeholder { color: var(--muted); }
+    textarea:focus { border-color: var(--accent); }
+
+    .editor-actions {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+
+    /* READING TIME BAR */
+    .reading-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .reading-bar .label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .reading-bar .value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    .divider { width: 1px; height: 20px; background: var(--border); }
+
+    /* DENSITY TABLE */
+    .density-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    .density-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+    }
+
+    .density-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .density-word {
+      width: 110px;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .density-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .density-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .density-count {
+      font-size: 13px;
+      color: var(--muted);
+      width: 28px;
+      text-align: right;
+    }
+
+    .density-empty {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    /* SOCIAL LIMITS */
+    .limits-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 500px) {
+      .limits-grid { grid-template-columns: 1fr; }
+    }
+
+    .limit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .limit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .limit-platform {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .limit-status {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .status-ok { background: rgba(52,211,153,0.15); color: var(--green); }
+    .status-over { background: rgba(251,191,36,0.15); color: var(--yellow); }
+
+    .limit-progress-bg {
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .limit-progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .fill-ok { background: var(--green); }
+    .fill-over { background: var(--yellow); }
+
+    .limit-sub {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* AD BOTTOM */
+    .ad-bottom {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--accent2); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- TOP AD SLOT: Replace with Google AdSense code -->
+<div class="ad-top">
+  <span>ADVERTISEMENT</span>
+  <!-- AdSense: <ins class="adsbygoogle" ...></ins> -->
+</div>
+
+<header>
+  <div class="logo">WordCount.tools</div>
+  <p>Free word counter — no signup, no limits, instant results</p>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="wordCount">0</div>
+      <div class="stat-label">Words</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="charCount">0</div>
+      <div class="stat-label">Characters</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="charNoSpace">0</div>
+      <div class="stat-label">No Spaces</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="sentenceCount">0</div>
+      <div class="stat-label">Sentences</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="paraCount">0</div>
+      <div class="stat-label">Paragraphs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="uniqueWords">0</div>
+      <div class="stat-label">Unique Words</div>
+    </div>
+  </div>
+
+  <!-- TEXTAREA -->
+  <div class="editor-wrap">
+    <textarea id="textInput" placeholder="Paste or type your text here…"></textarea>
+    <div class="editor-actions">
+      <button class="btn btn-ghost" onclick="copyText()">Copy</button>
+      <button class="btn btn-ghost" onclick="clearText()">Clear</button>
+    </div>
+  </div>
+
+  <!-- READING/SPEAKING TIME -->
+  <div class="reading-bar">
+    <div>
+      <div class="label">Reading time</div>
+      <div class="value" id="readTime">0 sec</div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="label">Speaking time</div>
+      <div class="value" id="speakTime">0 sec</div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="label">Avg word length</div>
+      <div class="value" id="avgWord">0 letters</div>
+    </div>
+  </div>
+
+  <!-- KEYWORD DENSITY -->
+  <div class="density-wrap">
+    <div class="density-title">Top Keywords</div>
+    <div id="densityList"><div class="density-empty">Start typing to see keyword frequency</div></div>
+  </div>
+
+  <!-- SOCIAL CHARACTER LIMITS -->
+  <div class="limits-grid">
+    <div class="limit-card">
+      <div class="limit-header">
+        <span class="limit-platform">𝕏 Twitter</span>
+        <span class="limit-status" id="twitterStatus">–</span>
+      </div>
+      <div class="limit-progress-bg"><div class="limit-progress-fill fill-ok" id="twitterBar" style="width:0%"></div></div>
+      <div class="limit-sub" id="twitterSub">280 character limit</div>
+    </div>
+    <div class="limit-card">
+      <div class="limit-header">
+        <span class="limit-platform">LinkedIn</span>
+        <span class="limit-status" id="linkedinStatus">–</span>
+      </div>
+      <div class="limit-progress-bg"><div class="limit-progress-fill fill-ok" id="linkedinBar" style="width:0%"></div></div>
+      <div class="limit-sub" id="linkedinSub">3,000 character limit (post)</div>
+    </div>
+    <div class="limit-card">
+      <div class="limit-header">
+        <span class="limit-platform">Instagram</span>
+        <span class="limit-status" id="instaStatus">–</span>
+      </div>
+      <div class="limit-progress-bg"><div class="limit-progress-fill fill-ok" id="instaBar" style="width:0%"></div></div>
+      <div class="limit-sub" id="instaSub">2,200 character limit</div>
+    </div>
+    <div class="limit-card">
+      <div class="limit-header">
+        <span class="limit-platform">Meta / Facebook</span>
+        <span class="limit-status" id="fbStatus">–</span>
+      </div>
+      <div class="limit-progress-bg"><div class="limit-progress-fill fill-ok" id="fbBar" style="width:0%"></div></div>
+      <div class="limit-sub" id="fbSub">63,206 character limit</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM AD SLOT -->
+  <div class="ad-bottom">
+    ADVERTISEMENT<br>
+    <!-- AdSense: <ins class="adsbygoogle" ...></ins> -->
+    <small>Your ad here</small>
+  </div>
+
+</div>
+
+<footer>
+  &copy; 2026 WordCount.tools &nbsp;·&nbsp; Free forever &nbsp;·&nbsp;
+  <a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">More Tools</a>
+</footer>
+
+<script>
+  const input = document.getElementById('textInput');
+
+  const STOPWORDS = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','is','it','as','be','by','that','this','with','from','was','are','were','have','has','had','not','i','we','you','he','she','they','what','which','who','will','do','did','so','if','up','out','can','about','into','than','then','when','all','also','just','its','our','your','my','his','her','their','more','been','would','could','should','may','might','us','them','there','these','those','some','any','no','only','over','after','before','such','other','new','one','two','three','first','second','very','also','back','well','way','even','both','where','how','much','because','still','each','own','off','through','while','under','never','same','every','between','without','again','during','few','per','near','since','against','above','below','along','around','among','upon','within','whether','however','therefore','although','though','rather','further','already','always','often','usually','maybe','perhaps']);
+
+  function analyze() {
+    const text = input.value;
+    const trimmed = text.trim();
+
+    const words = trimmed ? trimmed.split(/\s+/).filter(w => w.length > 0) : [];
+    const chars = text.length;
+    const charsNoSpace = text.replace(/\s/g, '').length;
+    const sentences = trimmed ? (trimmed.match(/[^.!?]*[.!?]+/g) || [trimmed]).length : 0;
+    const paras = trimmed ? text.split(/\n\s*\n/).filter(p => p.trim().length > 0).length : 0;
+
+    const wordSet = new Set(words.map(w => w.toLowerCase().replace(/[^a-z]/g, '')));
+    const uniqueCount = wordSet.size;
+
+    document.getElementById('wordCount').textContent = words.length.toLocaleString();
+    document.getElementById('charCount').textContent = chars.toLocaleString();
+    document.getElementById('charNoSpace').textContent = charsNoSpace.toLocaleString();
+    document.getElementById('sentenceCount').textContent = sentences.toLocaleString();
+    document.getElementById('paraCount').textContent = paras.toLocaleString();
+    document.getElementById('uniqueWords').textContent = uniqueCount.toLocaleString();
+
+    // Reading / speaking time
+    const wpm_read = 238, wpm_speak = 130;
+    const readSec = Math.round((words.length / wpm_read) * 60);
+    const speakSec = Math.round((words.length / wpm_speak) * 60);
+    const avgLen = words.length ? (words.join('').replace(/[^a-zA-Z]/g,'').length / words.length).toFixed(1) : 0;
+
+    document.getElementById('readTime').textContent = formatTime(readSec);
+    document.getElementById('speakTime').textContent = formatTime(speakSec);
+    document.getElementById('avgWord').textContent = avgLen + ' letters';
+
+    // Keyword density
+    const freq = {};
+    words.forEach(w => {
+      const clean = w.toLowerCase().replace(/[^a-z']/g, '');
+      if (clean.length > 2 && !STOPWORDS.has(clean)) freq[clean] = (freq[clean] || 0) + 1;
+    });
+    const top = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    const densityEl = document.getElementById('densityList');
+    if (top.length === 0) {
+      densityEl.innerHTML = '<div class="density-empty">Start typing to see keyword frequency</div>';
+    } else {
+      const max = top[0][1];
+      densityEl.innerHTML = top.map(([word, count]) => `
+        <div class="density-item">
+          <span class="density-word">${word}</span>
+          <div class="density-bar-bg"><div class="density-bar-fill" style="width:${(count/max*100).toFixed(1)}%"></div></div>
+          <span class="density-count">${count}</span>
+        </div>`).join('');
+    }
+
+    // Social limits
+    updateLimit('twitter', chars, 280);
+    updateLimit('linkedin', chars, 3000);
+    updateLimit('insta', chars, 2200);
+    updateLimit('fb', chars, 63206);
+  }
+
+  function updateLimit(id, chars, limit) {
+    const pct = Math.min((chars / limit) * 100, 100);
+    const over = chars > limit;
+    const remaining = limit - chars;
+    const bar = document.getElementById(id + 'Bar');
+    const status = document.getElementById(id + 'Status');
+    const sub = document.getElementById(id + 'Sub');
+
+    bar.style.width = pct + '%';
+    bar.className = 'limit-progress-fill ' + (over ? 'fill-over' : 'fill-ok');
+
+    if (chars === 0) {
+      status.textContent = '–';
+      status.className = 'limit-status';
+      sub.textContent = limit.toLocaleString() + ' character limit';
+    } else if (over) {
+      status.textContent = `+${Math.abs(remaining).toLocaleString()} over`;
+      status.className = 'limit-status status-over';
+      sub.textContent = `${chars.toLocaleString()} / ${limit.toLocaleString()} chars`;
+    } else {
+      status.textContent = `${remaining.toLocaleString()} left`;
+      status.className = 'limit-status status-ok';
+      sub.textContent = `${chars.toLocaleString()} / ${limit.toLocaleString()} chars`;
+    }
+  }
+
+  function formatTime(sec) {
+    if (sec < 60) return sec + ' sec';
+    const m = Math.floor(sec / 60), s = sec % 60;
+    return s > 0 ? `${m}m ${s}s` : `${m} min`;
+  }
+
+  function clearText() {
+    input.value = '';
+    analyze();
+  }
+
+  function copyText() {
+    navigator.clipboard.writeText(input.value);
+  }
+
+  input.addEventListener('input', analyze);
+  analyze();
+</script>
+</body>
+</html>

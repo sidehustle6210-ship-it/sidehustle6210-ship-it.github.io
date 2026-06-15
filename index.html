@@ -517,7 +517,10 @@ const wordSet = new Set(
       densityEl.innerHTML = '<div class="density-empty">Start typing to see keyword frequency</div>';
     } else {
       const max = top[0][1];
-      densityEl.innerHTML = top.map(([word, count]) => `
+densityEl.innerHTML = top.map(([word, count]) => {
+  const density = ((count / words.length) * 100).toFixed(1);
+
+  return `
         <div class="density-item">
           <span class="density-word">${word}</span>
           <div class="density-bar-bg"><div class="density-bar-fill" style="width:${(count/max*100).toFixed(1)}%"></div></div>

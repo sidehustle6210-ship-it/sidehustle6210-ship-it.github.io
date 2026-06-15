@@ -350,7 +350,7 @@
 </div>
 
 <header>
-  <div class="logo">Word Counter</div>
+  <div class="logo">WordCount.tools</div>
   <p>Free word counter — no signup, no limits, instant results</p>
 </header>
 
@@ -463,7 +463,7 @@
 </div>
 
 <footer>
-  &copy; 2026 Word Counter &nbsp;·&nbsp; Free forever &nbsp;·&nbsp;
+  &copy; 2026 WordCount.tools &nbsp;·&nbsp; Free forever &nbsp;·&nbsp;
   <a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">More Tools</a>
 </footer>
 
@@ -482,11 +482,8 @@
     const sentences = trimmed ? (trimmed.match(/[^.!?]*[.!?]+/g) || [trimmed]).length : 0;
     const paras = trimmed ? text.split(/\n\s*\n/).filter(p => p.trim().length > 0).length : 0;
 
-const wordSet = new Set(
-  words
-    .map(w => w.toLowerCase().replace(/[^a-z]/g, ''))
-    .filter(Boolean)
-);    const uniqueCount = wordSet.size;
+    const wordSet = new Set(words.map(w => w.toLowerCase().replace(/[^a-z]/g, '')));
+    const uniqueCount = wordSet.size;
 
     document.getElementById('wordCount').textContent = words.length.toLocaleString();
     document.getElementById('charCount').textContent = chars.toLocaleString();
@@ -517,10 +514,7 @@ const wordSet = new Set(
       densityEl.innerHTML = '<div class="density-empty">Start typing to see keyword frequency</div>';
     } else {
       const max = top[0][1];
-densityEl.innerHTML = top.map(([word, count]) => {
-  const density = ((count / words.length) * 100).toFixed(1);
-
-  return `
+      densityEl.innerHTML = top.map(([word, count]) => `
         <div class="density-item">
           <span class="density-word">${word}</span>
           <div class="density-bar-bg"><div class="density-bar-fill" style="width:${(count/max*100).toFixed(1)}%"></div></div>

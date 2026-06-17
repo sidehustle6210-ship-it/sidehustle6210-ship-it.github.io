@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypeRush – Free Typing Speed Test & Game</title>
+  <meta name="description" content="Test and improve your typing speed. Compete globally, track your WPM, and climb the leaderboard. Free, no signup required.">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080b14; --surface: #0e1220; --surface2: #161b2e; --border: #1f2744;
+      --accent: #00f5a0; --accent2: #00d9f5; --danger: #ff4d6d; --warning: #ffd166;
+      --text: #e2e8f8; --muted: #6b7599; --correct: #00f5a0; --incorrect: #ff4d6d;
+    }
+    body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    body::before { content:''; position:fixed; top:-200px; left:50%; transform:translateX(-50%); width:800px; height:400px; background:radial-gradient(ellipse,rgba(0,245,160,0.06) 0%,transparent 70%); pointer-events:none; z-index:0; }
+    .ad-top { background:var(--surface); border-bottom:1px solid var(--border); text-align:center; padding:10px; font-size:11px; color:var(--muted); letter-spacing:0.1em; position:relative; z-index:10; }
+    header { text-align:center; padding:32px 20px 20px; position:relative; z-index:10; }
+    .logo { font-family:'JetBrains Mono',monospace; font-size:36px; font-weight:700; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-1px; }
+    .logo span { color:var(--muted); -webkit-text-fill-color:var(--muted); }
+    header p { color:var(--muted); font-size:14px; margin-top:6px; }
+    .container { max-width:860px; margin:0 auto; padding:20px; position:relative; z-index:10; }
+    .tabs { display:flex; gap:8px; margin-bottom:24px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:6px; }
+    .tab { flex:1; padding:10px; border-radius:8px; border:none; background:transparent; color:var(--muted); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+    .tab.active { background:var(--surface2); color:var(--accent); border:1px solid var(--border); }
+    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    @media(max-width:600px){ .stats-row{grid-template-columns:repeat(2,1fr);} }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
+    .stat-value { font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; color:var(--accent); line-height:1; margin-bottom:4px; }
+    .stat-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; }
+    .category-row { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+    .pill { padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+    .pill.active { border-color:var(--accent); color:var(--accent); background:rgba(0,245,160,0.08); }
+    .typing-wrap { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:16px; position:relative; transition:border-color 0.2s; cursor:text; }
+    .typing-wrap.active { border-color:var(--accent); }
+    .typing-wrap.error { border-color:var(--danger); }
+    .quote-display { font-family:'JetBrains Mono',monospace; font-size:18px; line-height:1.8; margin-bottom:20px; min-height:80px; word-break:break-word; user-select:none; }
+    @media(max-width:600px){ .quote-display{font-size:15px;} }
+    .char { color:var(--muted); }
+    .char.correct { color:var(--correct); }
+    .char.incorrect { color:var(--incorrect); text-decoration:underline; }
+    .char.cursor { color:var(--bg); background:var(--accent); border-radius:2px; animation:blink 1s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    #hiddenInput { position:absolute; opacity:0; pointer-events:none; width:1px; height:1px; }
+    .progress-bg { height:4px; background:var(--surface2); border-radius:4px; overflow:hidden; margin-bottom:16px; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:4px; transition:width 0.1s; width:0%; }
+    .timer-row { display:flex; justify-content:space-between; align-items:center; }
+    .timer-display { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--accent); }
+    .timer-display.warning { color:var(--warning); }
+    .timer-display.danger { color:var(--danger); }
+    .btn { padding:10px 22px; border-radius:10px; border:none; font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.15s; }
+    .btn:active { transform:scale(0.97); }
+    .btn-primary { background:var(--accent); color:var(--bg); }
+    .btn-primary:hover { opacity:0.85; }
+    .btn-ghost { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
+    .btn-ghost:hover { color:var(--text); }
+    .result-screen { display:none; text-align:center; padding:32px 20px; }
+    .result-screen.show { display:block; }
+    .result-wpm { font-family:'JetBrains Mono',monospace; font-size:72px; font-weight:700; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1; }
+    .result-label { font-size:14px; color:var(--muted); margin-bottom:24px; text-transform:uppercase; letter-spacing:0.1em; }
+    .result-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; }
+    .result-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px; }
+    .result-card .val { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--accent2); }
+    .result-card .lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
+    .rank-badge { display:inline-block; padding:8px 24px; border-radius:20px; font-size:14px; font-weight:600; margin-bottom:20px; }
+    .name-input-wrap { margin-bottom:20px; }
+    .name-input-wrap input { background:var(--surface); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:'Space Grotesk',sans-serif; font-size:15px; padding:10px 16px; width:260px; outline:none; text-align:center; }
+    .name-input-wrap input:focus { border-color:var(--accent); }
+    .result-btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .leaderboard-wrap { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:20px; }
+    .lb-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .lb-title { font-size:14px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.08em; }
+    .lb-tabs { display:flex; gap:6px; }
+    .lb-tab { padding:4px 12px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--muted); font-size:12px; cursor:pointer; font-family:'Space Grotesk',sans-serif; }
+    .lb-tab.active { background:rgba(0,245,160,0.1); border-color:var(--accent); color:var(--accent); }
+    .lb-row { display:grid; grid-template-columns:40px 1fr 80px 80px; padding:12px 20px; border-bottom:1px solid var(--border); align-items:center; transition:background 0.15s; }
+    .lb-row:last-child { border-bottom:none; }
+    .lb-row:hover { background:var(--surface2); }
+    .lb-rank { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:var(--muted); }
+    .lb-rank.gold { color:#ffd700; }
+    .lb-rank.silver { color:#c0c0c0; }
+    .lb-rank.bronze { color:#cd7f32; }
+    .lb-name { font-size:14px; font-weight:500; }
+    .lb-wpm { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:var(--accent); text-align:right; }
+    .lb-acc { font-size:13px; color:var(--muted); text-align:right; }
+    .lb-empty { padding:32px; text-align:center; color:var(--muted); font-size:14px; }
+    .ad-bottom { background:var(--surface); border:1px dashed var(--border); border-radius:12px; padding:20px; text-align:center; font-size:11px; color:var(--muted); margin-bottom:20px; letter-spacing:0.1em; }
+    footer { text-align:center; padding:20px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); }
+    .click-hint { text-align:center; color:var(--muted); font-size:13px; margin-top:12px; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .share-score { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--accent); margin-bottom:16px; cursor:pointer; transition:border-color 0.2s; }
+    .share-score:hover { border-color:var(--accent); }
+  </style>
+</head>
+<body>
+<div class="ad-top">ADVERTISEMENT <!-- AdSense here --></div>
+<header>
+  <div class="logo">Type<span>//</span>Rush</div>
+  <p>Test your speed · Beat your best · Top the leaderboard</p>
+</header>
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('game')">🎮 Play</button>
+    <button class="tab" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
+    <button class="tab" onclick="switchTab('stats')">📊 My Stats</button>
+  </div>
+
+  <!-- GAME TAB -->
+  <div id="tab-game">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-value" id="liveWpm">0</div><div class="stat-label">WPM</div></div>
+      <div class="stat-card"><div class="stat-value" id="liveAcc">100%</div><div class="stat-label">Accuracy</div></div>
+      <div class="stat-card"><div class="stat-value" id="liveErrors">0</div><div class="stat-label">Errors</div></div>
+      <div class="stat-card"><div class="stat-value" id="liveStreak">0</div><div class="stat-label">Streak 🔥</div></div>
+    </div>
+    <div class="category-row">
+      <button class="pill active" onclick="setCategory('mix',this)">🎲 Mix</button>
+      <button class="pill" onclick="setCategory('words',this)">📝 Words</button>
+      <button class="pill" onclick="setCategory('quotes',this)">💬 Quotes</button>
+      <button class="pill" onclick="setCategory('desi',this)">🇮🇳 Desi</button>
+      <button class="pill" onclick="setCategory('code',this)">💻 Code</button>
+    </div>
+    <div class="typing-wrap" id="typingWrap" onclick="focusInput()">
+      <div class="quote-display" id="quoteDisplay"></div>
+      <div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="timer-row">
+        <div class="timer-display" id="timerDisplay">60s</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="resetGame()">↺ Reset</button>
+          <button class="btn btn-primary" onclick="newQuote()">Next →</button>
+        </div>
+      </div>
+      <div class="click-hint" id="clickHint">Click here or press any key to start typing</div>
+      <input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="result-screen" id="resultScreen">
+      <div class="result-wpm" id="resultWpm">0</div>
+      <div class="result-label">Words Per Minute</div>
+      <div class="rank-badge" id="rankBadge"></div>
+      <div class="result-grid">
+        <div class="result-card"><div class="val" id="rAcc">0%</div><div class="lbl">Accuracy</div></div>
+        <div class="result-card"><div class="val" id="rErrors">0</div><div class="lbl">Errors</div></div>
+        <div class="result-card"><div class="val" id="rTime">0s</div><div class="lbl">Time</div></div>
+      </div>
+      <div class="share-score" id="shareScore" onclick="copyScore()">📋 Click to copy your score and share!</div>
+      <div class="name-input-wrap">
+        <input type="text" id="playerName" placeholder="Your name for the global leaderboard" maxlength="20">
+      </div>
+      <div class="result-btns">
+        <button class="btn btn-primary" onclick="saveAndReset()">💾 Save to Leaderboard & Play Again</button>
+        <button class="btn btn-ghost" onclick="resetGame()">↺ Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD TAB -->
+  <div id="tab-leaderboard" style="display:none;">
+    <div class="leaderboard-wrap">
+      <div class="lb-header">
+        <div class="lb-title">🏆 Top Players</div>
+        <div class="lb-tabs">
+          <button class="lb-tab active" onclick="switchLbTab('global',this)">🌍 Global</button>
+          <button class="lb-tab" onclick="switchLbTab('local',this)">📱 My Device</button>
+        </div>
+      </div>
+      <div id="lbContent"><div class="lb-empty">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- STATS TAB -->
+  <div id="tab-stats" style="display:none;">
+    <div class="stats-row" style="grid-template-columns:repeat(2,1fr);">
+      <div class="stat-card"><div class="stat-value" id="myBestWpm">—</div><div class="stat-label">Best WPM</div></div>
+      <div class="stat-card"><div class="stat-value" id="myAvgWpm">—</div><div class="stat-label">Avg WPM</div></div>
+      <div class="stat-card"><div class="stat-value" id="myGames">0</div><div class="stat-label">Games Played</div></div>
+      <div class="stat-card"><div class="stat-value" id="myBestAcc">—</div><div class="stat-label">Best Accuracy</div></div>
+    </div>
+    <div class="leaderboard-wrap">
+      <div class="lb-header"><div class="lb-title">📜 My Recent Games</div></div>
+      <div id="myHistory"></div>
+    </div>
+  </div>
+
+  <div class="ad-bottom">ADVERTISEMENT <!-- AdSense here --></div>
+</div>
+<footer>© 2026 TypeRush · Free forever · <a href="index.html" style="color:#00f5a0;text-decoration:none;">More Tools</a></footer>
+
+<script>
+const CONTENT = {
+  words: [
+    "the quick brown fox jumps over the lazy dog and runs away into the forest at dawn",
+    "practice makes perfect when it comes to improving your typing speed every single day",
+    "keyboard shortcuts can save many hours of time when you learn and use them properly",
+    "consistency is the key to mastering any skill including fast and accurate typing speed",
+    "focus on accuracy first and speed will naturally follow with enough daily practice",
+    "typing without looking at the keyboard is called touch typing and it is very efficient",
+    "the home row keys are where your fingers should always rest when you are not typing",
+    "regular practice of just fifteen minutes a day can significantly improve your typing speed",
+  ],
+  quotes: [
+    "the only way to do great work is to love what you do said steve jobs at stanford",
+    "in the middle of every difficulty lies opportunity according to albert einstein",
+    "it does not matter how slowly you go as long as you do not stop said confucius",
+    "success is not final failure is not fatal it is the courage to continue that counts",
+    "the future belongs to those who believe in the beauty of their dreams eleanor roosevelt",
+    "do not watch the clock do what it does and just keep going said sam levenson",
+    "life is what happens when you are busy making other plans according to john lennon",
+    "the best time to plant a tree was twenty years ago the second best time is now",
+  ],
+  desi: [
+    "jugaad is the indian art of finding a clever solution to any problem with limited resources",
+    "chai pe charcha means having important conversations over a relaxing cup of hot tea",
+    "atithi devo bhava means the guest is equivalent to god in ancient indian culture",
+    "the dabbawalas of mumbai deliver thousands of home cooked meals every single day with accuracy",
+    "vasudhaiva kutumbakam means the whole world is one family in the ancient sanskrit language",
+    "india has one of the largest number of software engineers and developers in the entire world",
+    "cricket is not just a sport in india it is a religion followed by over a billion fans",
+    "the indian space research organisation launched mangalyaan to mars on its very first attempt",
+  ],
+  code: [
+    "variables declared with const cannot be reassigned after their very first initial declaration",
+    "use strict mode at the top of your javascript file to catch common coding mistakes early",
+    "arrow functions provide a much shorter syntax for writing function expressions in modern code",
+    "the spread operator allows you to easily expand an array into individual elements quickly",
+    "async and await makes asynchronous javascript code look and behave like synchronous code",
+    "arrays in javascript are zero indexed meaning the first element is always at position zero",
+    "a for loop repeats a block of code a specified number of times until the condition is false",
+    "functions are reusable blocks of code that perform a specific task when they are called",
+  ],
+};
+
+let category='mix', currentText='', typedIndex=0, errors=0, totalTyped=0;
+let streak=0, gameStarted=false, gameOver=false;
+let timerInterval=null, timeLeft=60, startTime=null, currentTab='game', lbTab='global';
+
+async function storageGet(key,shared=false){try{return await window.storage.get(key,shared);}catch{return null;}}
+async function storageSet(key,value,shared=false){try{return await window.storage.set(key,value,shared);}catch{return null;}}
+async function storageList(prefix,shared=false){try{return await window.storage.list(prefix,shared);}catch{return null;}}
+
+function getRandomText(){
+  let pool;
+  if(category==='mix'){const k=Object.keys(CONTENT);pool=CONTENT[k[Math.floor(Math.random()*k.length)]];}
+  else pool=CONTENT[category];
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function renderQuote(){
+  document.getElementById('quoteDisplay').innerHTML=currentText.split('').map((ch,i)=>{
+    let cls='char';
+    if(i<typedIndex)cls+=' correct';
+    if(i===typedIndex)cls+=' cursor';
+    return `<span class="${cls}" id="c${i}">${ch===' '?'&nbsp;':ch}</span>`;
+  }).join('');
+}
+
+function calcWpm(){
+  if(!startTime)return 0;
+  const elapsed=(Date.now()-startTime)/60000;
+  const correctWords=Math.max(0,(typedIndex-errors))/5;
+  return elapsed>0?Math.round(correctWords/elapsed):0;
+}
+
+function calcAccuracy(){
+  if(totalTyped===0)return 100;
+  return Math.round(((totalTyped-errors)/totalTyped)*100);
+}
+
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    updateTimerDisplay();
+    if(timeLeft<=0)endGame();
+  },1000);
+}
+
+function updateTimerDisplay(){
+  const el=document.getElementById('timerDisplay');
+  el.textContent=timeLeft+'s';
+  el.className='timer-display'+(timeLeft<=10?' danger':timeLeft<=20?' warning':'');
+}
+
+function updateLiveStats(){
+  document.getElementById('liveWpm').textContent=calcWpm();
+  document.getElementById('liveAcc').textContent=calcAccuracy()+'%';
+  document.getElementById('liveErrors').textContent=errors;
+  document.getElementById('liveStreak').textContent=streak;
+  document.getElementById('progressFill').style.width=((typedIndex/currentText.length)*100)+'%';
+}
+
+function focusInput(){document.getElementById('hiddenInput').focus();}
+
+function handleInput(e){
+  if(gameOver)return;
+  const typed=e.target.value;
+  if(!typed.length)return;
+  if(!gameStarted){
+    gameStarted=true; startTime=Date.now(); startTimer();
+    document.getElementById('clickHint').style.display='none';
+    document.getElementById('typingWrap').classList.add('active');
+  }
+  const lastChar=typed[typed.length-1];
+  totalTyped++;
+  if(typedIndex<currentText.length){
+    const cur=document.getElementById('c'+typedIndex);
+    if(cur)cur.className='char '+(lastChar===currentText[typedIndex]?'correct':'incorrect');
+    if(lastChar===currentText[typedIndex]){streak++;}
+    else{errors++;streak=0;document.getElementById('typingWrap').classList.add('error');setTimeout(()=>document.getElementById('typingWrap').classList.remove('error'),300);}
+    typedIndex++;
+    const next=document.getElementById('c'+typedIndex);
+    if(next&&!next.className.includes('cursor'))next.className+=' cursor';
+  }
+  e.target.value='';
+  updateLiveStats();
+  if(typedIndex>=currentText.length)endGame();
+}
+
+function endGame(){
+  gameOver=true; clearInterval(timerInterval);
+  const wpm=calcWpm(), acc=calcAccuracy(), timeTaken=startTime?Math.round((Date.now()-startTime)/1000):60;
+  document.getElementById('resultScreen').classList.add('show');
+  document.getElementById('resultWpm').textContent=wpm;
+  document.getElementById('rAcc').textContent=acc+'%';
+  document.getElementById('rErrors').textContent=errors;
+  document.getElementById('rTime').textContent=timeTaken+'s';
+  const badge=document.getElementById('rankBadge');
+  if(wpm>=100){badge.textContent='🏆 Elite Typist!';badge.style.cssText='background:rgba(255,215,0,0.15);color:#ffd700;';}
+  else if(wpm>=70){badge.textContent='⚡ Speed Demon!';badge.style.cssText='background:rgba(0,245,160,0.15);color:#00f5a0;';}
+  else if(wpm>=50){badge.textContent='🚀 Fast Fingers!';badge.style.cssText='background:rgba(0,217,245,0.15);color:#00d9f5;';}
+  else if(wpm>=30){badge.textContent='👍 Getting There!';badge.style.cssText='background:rgba(255,209,102,0.15);color:#ffd166;';}
+  else{badge.textContent='🌱 Keep Practicing!';badge.style.cssText='background:rgba(107,117,153,0.15);color:#6b7599;';}
+  document.getElementById('shareScore').textContent=`📋 I scored ${wpm} WPM with ${acc}% accuracy on TypeRush! Can you beat me? Try it free!`;
+  saveLocalHistory({wpm,acc,errors,time:timeTaken,category,date:new Date().toLocaleDateString()});
+}
+
+function copyScore(){
+  const t=document.getElementById('shareScore').textContent.replace('📋 ','');
+  navigator.clipboard.writeText(t).then(()=>{document.getElementById('shareScore').textContent='✅ Copied! Share it on WhatsApp or LinkedIn!';});
+}
+
+async function saveAndReset(){
+  const name=document.getElementById('playerName').value.trim()||'Anonymous';
+  const wpm=parseInt(document.getElementById('resultWpm').textContent);
+  const acc=parseInt(document.getElementById('rAcc').textContent);
+  await storageSet('lb:'+Date.now(),JSON.stringify({name,wpm,acc,date:new Date().toLocaleDateString()}),true);
+  resetGame();
+}
+
+function resetGame(){
+  clearInterval(timerInterval);
+  typedIndex=0;errors=0;totalTyped=0;streak=0;
+  gameStarted=false;gameOver=false;timeLeft=60;startTime=null;
+  document.getElementById('hiddenInput').value='';
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('typingWrap').classList.remove('active','error');
+  document.getElementById('clickHint').style.display='block';
+  document.getElementById('progressFill').style.width='0%';
+  updateTimerDisplay(); updateLiveStats(); newQuote(); focusInput();
+}
+
+function newQuote(){currentText=getRandomText();typedIndex=0;renderQuote();}
+
+function setCategory(cat,el){
+  category=cat;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  resetGame();
+}
+
+function saveLocalHistory(entry){
+  const h=getLocalHistory();h.unshift(entry);if(h.length>20)h.pop();
+  try{localStorage.setItem('typerush_history',JSON.stringify(h));}catch{}
+}
+
+function getLocalHistory(){try{return JSON.parse(localStorage.getItem('typerush_history')||'[]');}catch{return[];}}
+
+function switchTab(tab){
+  currentTab=tab;
+  ['game','leaderboard','stats'].forEach(t=>document.getElementById('tab-'+t).style.display=t===tab?'block':'none');
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['game','leaderboard','stats'][i]===tab));
+  if(tab==='leaderboard')loadLeaderboard();
+  if(tab==='stats')loadStats();
+}
+
+async function loadLeaderboard(){
+  const content=document.getElementById('lbContent');
+  content.innerHTML='<div class="lb-empty">Loading scores...</div>';
+  if(lbTab==='global'){
+    const result=await storageList('lb:',true);
+    if(!result||!result.keys||result.keys.length===0){content.innerHTML='<div class="lb-empty">No global scores yet — be the first! 🏆</div>';return;}
+    const entries=[];
+    for(const key of result.keys){const r=await storageGet(key,true);if(r){try{entries.push(JSON.parse(r.value));}catch{}}}
+    entries.sort((a,b)=>b.wpm-a.wpm);
+    renderLbRows(content,entries.slice(0,15));
+  } else {
+    const h=getLocalHistory();
+    if(h.length===0){content.innerHTML='<div class="lb-empty">No local scores yet — play a game first!</div>';return;}
+    renderLbRows(content,h.slice(0,10),true);
+  }
+}
+
+function renderLbRows(container,entries,local=false){
+  if(!entries.length){container.innerHTML='<div class="lb-empty">No scores yet!</div>';return;}
+  container.innerHTML=entries.map((e,i)=>{
+    const rc=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const ri=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    const name=local?e.category:(e.name||'Anonymous');
+    return `<div class="lb-row"><div class="lb-rank ${rc}">${ri}</div><div class="lb-name">${name}${local?` <span style="color:var(--muted);font-size:11px;">${e.date}</span>`:''}</div><div class="lb-wpm">${e.wpm} <span style="font-size:11px;color:var(--muted)">WPM</span></div><div class="lb-acc">${e.acc}%</div></div>`;
+  }).join('');
+}
+
+function switchLbTab(tab,el){
+  lbTab=tab;
+  document.querySelectorAll('.lb-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  loadLeaderboard();
+}
+
+function loadStats(){
+  const h=getLocalHistory();
+  if(!h.length){document.getElementById('myGames').textContent='0';document.getElementById('myHistory').innerHTML='<div class="lb-empty">No games played yet!</div>';return;}
+  const wpms=h.map(x=>x.wpm),accs=h.map(x=>x.acc);
+  document.getElementById('myBestWpm').textContent=Math.max(...wpms);
+  document.getElementById('myAvgWpm').textContent=Math.round(wpms.reduce((a,b)=>a+b,0)/wpms.length);
+  document.getElementById('myGames').textContent=h.length;
+  document.getElementById('myBestAcc').textContent=Math.max(...accs)+'%';
+  document.getElementById('myHistory').innerHTML=h.slice(0,10).map((e,i)=>`<div class="lb-row"><div class="lb-rank">${i+1}</div><div class="lb-name" style="font-size:12px;color:var(--muted);">${e.date} · ${e.category}</div><div class="lb-wpm">${e.wpm} <span style="font-size:11px;color:var(--muted)">WPM</span></div><div class="lb-acc">${e.acc}%</div></div>`).join('');
+}
+
+document.getElementById('hiddenInput').addEventListener('input',handleInput);
+document.addEventListener('keydown',()=>{if(currentTab==='game'&&!gameOver)focusInput();});
+newQuote(); focusInput();
+</script>
+</body>
+</html>
